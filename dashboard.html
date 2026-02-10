@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="menu">
+  <button onclick="logout()">Sair</button>
+</div>
+
+<div class="card">
+  <h2>Dashboard</h2>
+  <p id="credits">Créditos: 0</p>
+
+  <select id="time">
+    <option value="1">24h - 1 crédito</option>
+    <option value="3">3 dias - 5 créditos</option>
+    <option value="5">5 dias - 10 créditos</option>
+    <option value="15">15 dias - 20 créditos</option>
+    <option value="30">30 dias - 30 créditos</option>
+  </select>
+
+  <button onclick="generateKey()">Gerar Key</button>
+
+  <h3>Minhas Keys</h3>
+  <ul id="keys"></ul>
+</div>
+
+<script type="module" src="js/dashboard.js"></script>
+</body>
+</html>
