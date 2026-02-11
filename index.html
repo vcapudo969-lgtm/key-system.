@@ -2,37 +2,150 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Key System - Login</title>
-<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Key System</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+  height:100vh;
+  background:#0b0f1a;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+
+/* Fundo gamer */
+body::before{
+  content:"";
+  position:absolute;
+  width:200%;
+  height:200%;
+  background: radial-gradient(circle,#00ff8830 0%, transparent 60%);
+  animation: glowMove 6s infinite linear;
+}
+
+@keyframes glowMove{
+  0%{transform:translate(-30%,-30%)}
+  50%{transform:translate(-35%,-35%)}
+  100%{transform:translate(-30%,-30%)}
+}
+
+.panel{
+  position:relative;
+  width:480px;
+  padding:50px 40px;
+  background:#111827;
+  border-radius:20px;
+  border:1px solid #00ff8850;
+  box-shadow:0 0 40px #00ff8820;
+  text-align:center;
+  z-index:2;
+}
+
+.panel h1{
+  color:#00ff88;
+  font-size:32px;
+  margin-bottom:10px;
+  text-shadow:0 0 10px #00ff88;
+}
+
+.panel p{
+  color:#94a3b8;
+  margin-bottom:30px;
+}
+
+.tabs{
+  display:flex;
+  margin-bottom:20px;
+}
+
+.tabs button{
+  flex:1;
+  padding:12px;
+  background:#1f2937;
+  border:none;
+  color:#94a3b8;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.tabs button.active{
+  background:#00ff88;
+  color:black;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  margin:12px 0;
+  background:#1f2937;
+  border:1px solid #374151;
+  border-radius:8px;
+  color:white;
+}
+
+input:focus{
+  outline:none;
+  border:1px solid #00ff88;
+}
+
+.main-btn{
+  width:100%;
+  padding:14px;
+  margin-top:20px;
+  background:#00ff88;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.main-btn:hover{
+  background:#00cc6a;
+}
+
+#msg{
+  margin-top:15px;
+  min-height:20px;
+  color:#f87171;
+}
+</style>
 </head>
+
 <body>
 
-<div class="login-container">
-  <div class="login-card">
+<div class="panel">
 
-    <h1>🔥 KEY SYSTEM</h1>
-    <p class="subtitle">Painel de Acesso</p>
+  <h1>⚡ KEY SYSTEM ⚡</h1>
+  <p>Painel de Acesso</p>
 
-    <div class="tabs">
-      <button id="loginTab" class="active" onclick="showLogin()">Entrar</button>
-      <button id="registerTab" onclick="showRegister()">Registrar</button>
-    </div>
-
-    <div id="loginBox">
-      <input type="email" id="loginEmail" placeholder="Email">
-      <input type="password" id="loginPassword" placeholder="Senha">
-      <button class="main-btn" onclick="login()">Entrar</button>
-    </div>
-
-    <div id="registerBox" style="display:none;">
-      <input type="email" id="registerEmail" placeholder="Email">
-      <input type="password" id="registerPassword" placeholder="Senha">
-      <button class="main-btn" onclick="register()">Criar Conta</button>
-    </div>
-
-    <p id="msg"></p>
-
+  <div class="tabs">
+    <button id="loginTab" class="active" onclick="showLogin()">LOGIN</button>
+    <button id="registerTab" onclick="showRegister()">REGISTRO</button>
   </div>
+
+  <div id="loginBox">
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Senha">
+    <button class="main-btn" onclick="login()">ENTRAR</button>
+  </div>
+
+  <div id="registerBox" style="display:none;">
+    <input type="email" id="registerEmail" placeholder="Email">
+    <input type="password" id="registerPassword" placeholder="Senha">
+    <button class="main-btn" onclick="register()">CRIAR CONTA</button>
+  </div>
+
+  <div id="msg"></div>
+
 </div>
 
 <script type="module" src="js/auth.js"></script>
