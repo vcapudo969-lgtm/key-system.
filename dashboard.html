@@ -1,251 +1,125 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Key System Pro</title>
+<title>Painel Usuário</title>
 
 <style>
-body{
-    margin:0;
-    font-family:Arial, Helvetica, sans-serif;
-    background:#0f172a;
-    color:white;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+body{height:100vh;background:#0b0f1a;color:white;display:flex;flex-direction:column;}
 
-/* NAVBAR */
 .navbar{
-    background:#111827;
-    padding:15px;
-    display:flex;
-    align-items:center;
-    gap:15px;
-    font-size:20px;
+background:#111827;padding:15px;display:flex;align-items:center;gap:15px;
 }
 
 .menu-btn{
-    cursor:pointer;
-    font-size:22px;
+cursor:pointer;font-size:22px;
 }
 
-/* SIDEBAR */
 .sidebar{
-    position:fixed;
-    top:0;
-    left:-250px;
-    width:220px;
-    height:100%;
-    background:#1e293b;
-    transition:.3s;
-    padding-top:60px;
+position:fixed;left:-250px;top:0;width:230px;height:100%;background:#1f2937;
+transition:.3s;padding-top:60px;z-index:1000;
 }
 
 .sidebar a{
-    display:block;
-    padding:15px;
-    color:white;
-    text-decoration:none;
-    border-bottom:1px solid #334155;
+display:block;padding:15px;color:white;text-decoration:none;border-bottom:1px solid #374151;cursor:pointer;
 }
 
-.sidebar a:hover{
-    background:#334155;
-}
+.sidebar a:hover{background:#00ff8830;}
 
-.sidebar.active{
-    left:0;
-}
+.sidebar.active{left:0;}
 
 .overlay{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,.5);
-    display:none;
+position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);
+display:none;z-index:900;
 }
 
-.overlay.active{
-    display:block;
+.overlay.active{display:block;}
+
+.content{
+padding:20px;
+flex:1;
+overflow-y:auto;
 }
 
-/* CONTAINER */
-.container{
-    padding:20px;
-    max-width:500px;
-    margin:20px auto;
-}
-
-/* CARD */
 .card{
-    background:#1e293b;
-    padding:20px;
-    border-radius:10px;
-    margin-bottom:20px;
+background:#111827;padding:20px;border-radius:10px;margin-bottom:20px;
 }
 
 button{
-    background:#7c3aed;
-    border:none;
-    padding:10px 15px;
-    color:white;
-    border-radius:5px;
-    cursor:pointer;
+padding:10px;background:#00ff88;border:none;border-radius:6px;cursor:pointer;margin-top:10px;
 }
 
-button:hover{
-    opacity:.8;
-}
-
-select,input{
-    width:100%;
-    padding:10px;
-    margin-bottom:10px;
-    border-radius:5px;
-    border:none;
-}
-
-.key-box{
-    background:#0f172a;
-    padding:10px;
-    border-radius:5px;
-    margin-bottom:10px;
-    border-left:4px solid #7c3aed;
-}
-.expired{
-    border-left:4px solid red;
-}
+button:hover{opacity:.8;}
 </style>
 </head>
-
 <body>
 
 <div class="navbar">
-    <div class="menu-btn" onclick="toggleMenu()">☰</div>
-    <div>Key System Pro</div>
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
+<h3>Painel Usuário</h3>
 </div>
 
-<div class="overlay" onclick="toggleMenu()" id="overlay"></div>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <div class="sidebar" id="sidebar">
-    <a onclick="showTab('dashboard')">📊 Dashboard</a>
-    <a onclick="showTab('gerador')">🔑 Gerador</a>
-    <a onclick="showTab('keys')">📂 Minhas Keys</a>
-
+<a onclick="showDashboard()">📊 Dashboard</a>
+<a onclick="viewMyKeys()">🔑 Minhas Keys</a>
+<a onclick="logout()">🚪 Sair</a>
 </div>
 
-<div class="container">
-
-<!-- DASHBOARD -->
-<div id="dashboard" class="card">
-    <h2>Dashboard</h2>
-    <p>Créditos: <span id="creditDisplay">0</span></p>
-    <p>Total de Keys: <span id="totalKeys">0</span></p>
-</div>
-
-<!-- GERADOR -->
-<div id="gerador" class="card" style="display:none;">
-    <h2>Gerar Key</h2>
-
-    <label>Validade</label>
-    <select id="validade">
-        <option value="1">1 Dia</option>
-        <option value="7">7 Dias</option>
-        <option value="30">30 Dias</option>
-    </select>
-
-    <button onclick="generateKey()">Gerar</button>
-</div>
-
-<!-- KEYS -->
-<div id="keys" class="card" style="display:none;">
-    <h2>Minhas Keys</h2>
-    <div id="keysList"></div>
-</div>
-
-</div>
+<div class="content" id="content"></div>
 
 <script>
+// 🔐 Proteção
+if(localStorage.getItem("role")!=="user"){
+    window.location.href="index.html";
+}
 
-let credits = parseInt(localStorage.getItem("credits")) || 5;
+let currentUser = localStorage.getItem("currentUser");
+let users = JSON.parse(localStorage.getItem("users")) || {};
 let keys = JSON.parse(localStorage.getItem("keys")) || [];
 
-updateUI();
-
 function toggleMenu(){
-    document.getElementById("sidebar").classList.toggle("active");
-    document.getElementById("overlay").classList.toggle("active");
+    sidebar.classList.toggle("active");
+    overlay.classList.toggle("active");
 }
 
-function showTab(tab){
-    document.getElementById("dashboard").style.display="none";
-    document.getElementById("gerador").style.display="none";
-    document.getElementById("keys").style.display="none";
-
-    document.getElementById(tab).style.display="block";
-    toggleMenu();
+// 📊 Dashboard
+function showDashboard(){
+    content.innerHTML=`
+    <div class="card">
+    <h3>📊 Dashboard</h3>
+    <p>Email: ${currentUser}</p>
+    <p>Créditos: ${users[currentUser].credits}</p>
+    <p>Total Keys geradas: ${keys.filter(k=>k.owner===currentUser).length}</p>
+    </div>
+    `;
 }
+showDashboard();
 
-function generateKey(){
-
-    if(credits <= 0){
-        alert("Sem créditos!");
-        return;
+// 🔑 Ver minhas keys
+function viewMyKeys(){
+    let userKeys = keys.filter(k=>k.owner===currentUser);
+    let html="<div class='card'><h3>🔑 Minhas Keys</h3>";
+    if(userKeys.length===0){
+        html+="<p>Nenhuma key gerada ainda.</p>";
+    }else{
+        userKeys.forEach(k=>{
+            html+=`<p>${k.code} | Validade: ${k.validity||"Indefinida"} | ${k.date}</p>`;
+        });
     }
-
-    let dias = parseInt(document.getElementById("validade").value);
-    let expiration = new Date();
-    expiration.setDate(expiration.getDate() + dias);
-
-    let newKey = {
-        code: "KEY-" + Math.random().toString(36).substr(2,9).toUpperCase(),
-        expires: expiration.getTime()
-    };
-
-    keys.push(newKey);
-    credits--;
-
-    saveData();
-    updateUI();
+    html+="</div>";
+    content.innerHTML=html;
 }
 
-function updateUI(){
-
-    document.getElementById("creditDisplay").innerText = credits;
-    document.getElementById("totalKeys").innerText = keys.length;
-
-    let list = document.getElementById("keysList");
-    list.innerHTML="";
-
-    let now = Date.now();
-
-    keys.forEach(k=>{
-        let expired = now > k.expires;
-        let box = document.createElement("div");
-        box.className = "key-box" + (expired ? " expired" : "");
-        box.innerHTML = `
-            <strong>${k.code}</strong><br>
-            Expira em: ${new Date(k.expires).toLocaleDateString()}<br>
-            Status: ${expired ? "EXPIRADA" : "ATIVA"}
-        `;
-        list.appendChild(box);
-    });
+// 🚪 Logout
+function logout(){
+    localStorage.clear();
+    window.location.href="index.html";
 }
-
-function addCredits(){
-    credits += 10;
-    saveData();
-    updateUI();
-    alert("10 créditos adicionados (ADM)");
-}
-
-function saveData(){
-    localStorage.setItem("credits", credits);
-    localStorage.setItem("keys", JSON.stringify(keys));
-}
-
 </script>
 
 </body>
-</html>
+</html>>
