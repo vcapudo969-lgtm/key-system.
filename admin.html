@@ -34,8 +34,9 @@ label{color:white;font-weight:bold;}
 
 <div class="sidebar" id="sidebar">
 <a onclick="loadDashboard()">📊 Dashboard</a>
+<a onclick="generateKeyUI()">⚡ Gerar Key</a>
+<a onclick="viewUsers()">👥 Ver Usuários</a>
 <a onclick="manageCredits()">💰 Gerenciar Créditos</a>
-<a onclick="generateKeyUI()">⚡ Gerar Key (Para ADM)</a>
 <a onclick="viewKeys()">📂 Ver Todas Keys</a>
 <a onclick="logout()">🚪 Sair</a>
 </div>
@@ -43,7 +44,7 @@ label{color:white;font-weight:bold;}
 <div class="content" id="content"></div>
 
 <script>
-// Proteção
+// Proteção ADM
 if(localStorage.getItem("role")!=="admin"){window.location.href="index.html";}
 let users = JSON.parse(localStorage.getItem("users")) || {};
 let keys = JSON.parse(localStorage.getItem("keys")) || [];
@@ -95,7 +96,7 @@ if(users[currentUser].credits < totalCost){
 
 for(let i=0;i<qty;i++){
     let key = "KEY-"+Math.random().toString(36).substr(2,9).toUpperCase();
-    keys.push({code:key,owner:currentUser,date:new Date().toLocaleDateString(),validity:validity});
+    keys.push({code:key,owner:currentUser,date:new Date().toLocaleDateString(),validity:validity,status:"active"});
 }
 
 users[currentUser].credits -= totalCost;
@@ -105,24 +106,24 @@ alert(`${qty} key(s) gerada(s)!`);
 generateKeyUI();
 }
 
-// 📂 Ver todas as keys
-function viewKeys(){
-let html="<div class='card'><h3>📂 Todas as Keys</h3>";
-if(keys.length===0){html+="<p>Nenhuma key gerada ainda.</p>";}else{
-keys.forEach(k=>{html+=`<p>${k.code} | Dono: ${k.owner} | Validade: ${k.validity} | ${k.date}</p>`;});}
+// 👥 Ver Usuários
+function viewUsers(){
+let html="<div class='card'><h3>👥 Todos os Usuários</h3>";
+for(const user in users){
+    html+=`<p>${user} | Créditos: ${users[user].credits}</p>`;
+}
 html+="</div>";
 content.innerHTML=html;
 }
 
-// 💰 Gerenciar créditos de qualquer usuário
+// 💰 Gerenciar Créditos (digitar nome)
 function manageCredits(){
-let userOptions = Object.keys(users).map(u=>`<option value="${u}">${u} (Créditos: ${users[u].credits})</option>`).join("");
 content.innerHTML = `<div class="card">
 <h3>💰 Gerenciar Créditos</h3>
-<label>Selecionar usuário:</label>
-<select id="selectedUser">${userOptions}</select>
+<label>Nome do usuário:</label>
+<input type="text" id="creditUser" placeholder="Digite o nome do usuário">
 <label>Adicionar créditos:</label>
-<input type="number" id="addCredits" value="1" min="1">
+<input type="number" id="addCredits" value="0" min="0">
 <label>Remover créditos:</label>
 <input type="number" id="removeCredits" value="0" min="0">
 <button onclick="updateCredits()">Atualizar Créditos</button>
@@ -130,26 +131,36 @@ content.innerHTML = `<div class="card">
 }
 
 function updateCredits(){
-let user = document.getElementById("selectedUser").value;
-let add = parseInt(document.getElementById("addCredits").value);
-let remove = parseInt(document.getElementById("removeCredits").value);
+let user = document.getElementById("creditUser").value.trim();
+let add = parseInt(document.getElementById("addCredits").value) || 0;
+let remove = parseInt(document.getElementById("removeCredits").value) || 0;
 
-if(!users[user]){alert("Usuário inválido!"); return;}
-
-users[user].credits = (users[user].credits + add) - remove;
-if(users[user].credits < 0) users[user].credits = 0;
-
-localStorage.setItem("users",JSON.stringify(users));
-alert(`Créditos atualizados para ${user}: ${users[user].credits}`);
-manageCredits(); // atualizar UI
+if(!users[user]){
+    alert("Usuário não encontrado!");
+    return;
 }
 
-// 🚪 Logout
+users[user].credits = (users[user].credits + add) - remove;
+if(users[user].credits<0) users[user].credits=0;
+localStorage.setItem("users",JSON.stringify(users));
+alert(`Créditos atualizados para ${user}: ${users[user].credits}`);
+manageCredits();
+}
+
+// 📂 Ver todas as keys
+function viewKeys(){
+let html="<div class='card'><h3>📂 Todas as Keys</h3>";
+if(keys.length===0){html+="<p>Nenhuma key gerada ainda.</p>";}else{
+keys.forEach(k=>{html+=`<p>${k.code} | Dono: ${k.owner} | Validade: ${k.validity} | ${k.status}</p>`;});}
+html+="</div>";
+content.innerHTML=html;
+}
+
+// Logout
 function logout(){localStorage.clear();window.location.href="index.html";}
 
 // Inicializa
 loadDashboard();
 </script>
-
 </body>
 </html>
