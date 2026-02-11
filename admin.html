@@ -4,86 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel ADM</title>
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-body{background:#0b0f1a;color:white}
-
-/* NAVBAR */
-.navbar{
-background:#111827;
-padding:15px;
-display:flex;
-align-items:center;
-gap:15px;
-}
-
-.menu-btn{
-cursor:pointer;
-font-size:22px;
-}
-
-/* SIDEBAR */
-.sidebar{
-position:fixed;
-left:-250px;
-top:0;
-width:230px;
-height:100%;
-background:#1f2937;
-transition:.3s;
-padding-top:60px;
-z-index:1000;
-}
-
-.sidebar a{
-display:block;
-padding:15px;
-color:white;
-text-decoration:none;
-border-bottom:1px solid #374151;
-cursor:pointer;
-}
-
-.sidebar a:hover{
-background:#00ff8830;
-}
-
-.sidebar.active{left:0}
-
-/* OVERLAY */
-.overlay{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.6);
-display:none;
-z-index:900;
-}
-
-.overlay.active{display:block}
-
-.content{
-padding:20px;
-}
-
-.card{
-background:#111827;
-padding:20px;
-border-radius:10px;
-margin-bottom:20px;
-}
-button{
-padding:10px;
-background:#00ff88;
-border:none;
-border-radius:6px;
-cursor:pointer;
-margin-top:10px;
-}
-button:hover{opacity:.8}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+body{background:#0b0f1a;color:white;height:100vh;display:flex;flex-direction:column;}
+.navbar{background:#111827;padding:15px;display:flex;align-items:center;gap:15px;}
+.menu-btn{cursor:pointer;font-size:22px;}
+.sidebar{position:fixed;left:-250px;top:0;width:230px;height:100%;background:#1f2937;transition:.3s;padding-top:60px;z-index:1000;}
+.sidebar a{display:block;padding:15px;color:white;text-decoration:none;border-bottom:1px solid #374151;cursor:pointer;}
+.sidebar a:hover{background:#00ff8830;}
+.sidebar.active{left:0;}
+.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:none;z-index:900;}
+.overlay.active{display:block;}
+.content{padding:20px;flex:1;overflow-y:auto;}
+.card{background:#111827;padding:20px;border-radius:10px;margin-bottom:20px;}
+button{padding:10px;background:#00ff88;border:none;border-radius:6px;cursor:pointer;margin-top:10px;}
+button:hover{opacity:.8;}
+input, select{padding:8px;border-radius:5px;border:none;margin:5px 0;width:100%;color:black;}
+label{color:white;font-weight:bold;}
 </style>
 </head>
 <body>
@@ -98,8 +35,7 @@ button:hover{opacity:.8}
 <div class="sidebar" id="sidebar">
 <a onclick="loadDashboard()">📊 Dashboard</a>
 <a onclick="loadUsers()">👥 Usuários</a>
-<a onclick="addCredits()">💰 Adicionar Créditos</a>
-<a onclick="generateKey()">🔑 Gerar Key</a>
+<a onclick="generateKeyUI()">⚡ Gerar Key</a>
 <a onclick="viewKeys()">📂 Ver Keys</a>
 <a onclick="logout()">🚪 Sair</a>
 </div>
@@ -107,92 +43,89 @@ button:hover{opacity:.8}
 <div class="content" id="content"></div>
 
 <script>
-
-/* 🔐 PROTEÇÃO */
-if(localStorage.getItem("role")!=="admin"){
-window.location.href="index.html";
-}
-
-/* DADOS */
+// Proteção
+if(localStorage.getItem("role")!=="admin"){window.location.href="index.html";}
 let users = JSON.parse(localStorage.getItem("users")) || {};
 let keys = JSON.parse(localStorage.getItem("keys")) || [];
 
-/* MENU */
-function toggleMenu(){
-sidebar.classList.toggle("active");
-overlay.classList.toggle("active");
-}
+function toggleMenu(){sidebar.classList.toggle("active");overlay.classList.toggle("active");}
 
-/* DASHBOARD */
+// Dashboard
 function loadDashboard(){
-content.innerHTML=`
-<div class="card">
-<h3>📊 Estatísticas</h3>
+content.innerHTML=`<div class="card"><h3>📊 Dashboard</h3>
 <p>Total usuários: ${Object.keys(users).length}</p>
 <p>Total keys: ${keys.length}</p>
+</div>`;
+}
+
+// Usuários
+function loadUsers(){
+let html="<div class='card'><h3>👥 Usuários</h3>";
+for(let u in users){html+=`<p>${u} - Créditos: ${users[u].credits}</p>`;}
+html+="</div>";
+content.innerHTML=html;
+}
+
+// Gerar Key UI (igual usuário)
+function generateKeyUI(){
+let creditCost = 1; // custo por key
+let userOptions = Object.keys(users).map(u=>`<option value="${u}">${u} (Créditos: ${users[u].credits})</option>`).join("");
+content.innerHTML = `
+<div class="card">
+<h3>⚡ Gerar Key</h3>
+<label>Selecionar usuário:</label>
+<select id="selectedUser">${userOptions}</select>
+<label>Validade:</label>
+<select id="keyValidity">
+<option value="24h">24h</option>
+<option value="7d">7d</option>
+<option value="30d">30d</option>
+</select>
+<label>Quantidade de keys:</label>
+<input type="number" id="keyQty" value="1" min="1">
+<p>Créditos por key: ${creditCost}</p>
+<button onclick="generateKeysForUser(${creditCost})">Gerar Key(s)</button>
 </div>
 `;
 }
-loadDashboard();
 
-/* LISTAR USUÁRIOS */
-function loadUsers(){
-let html="<div class='card'><h3>👥 Usuários</h3>";
-for(let u in users){
-html+=`<p>${u} - Créditos: ${users[u].credits}</p>`;
+// Gerar keys e gastar créditos
+function generateKeysForUser(cost){
+let qty = parseInt(document.getElementById("keyQty").value);
+let validity = document.getElementById("keyValidity").value;
+let selectedUser = document.getElementById("selectedUser").value;
+let totalCost = qty * cost;
+
+if(users[selectedUser].credits < totalCost){
+    alert("Créditos insuficientes para gerar as keys!");
+    return;
 }
-html+="</div>";
-content.innerHTML=html;
+
+for(let i=0;i<qty;i++){
+    let key = "KEY-"+Math.random().toString(36).substr(2,9).toUpperCase();
+    keys.push({code:key,owner:selectedUser,date:new Date().toLocaleDateString(),validity:validity});
 }
 
-/* ADICIONAR CRÉDITOS */
-function addCredits(){
-let user=prompt("Email do usuário:");
-let value=parseInt(prompt("Quantidade de créditos:"));
-
-if(users[user]){
-users[user].credits+=value;
+users[selectedUser].credits -= totalCost;
 localStorage.setItem("users",JSON.stringify(users));
-alert("Créditos adicionados!");
-}else{
-alert("Usuário não encontrado");
-}
-}
-
-/* GERAR KEY */
-function generateKey(){
-let key="KEY-"+Math.random().toString(36).substr(2,9).toUpperCase();
-
-keys.push({
-code:key,
-owner:"ADMIN",
-date:new Date().toLocaleDateString()
-});
-
 localStorage.setItem("keys",JSON.stringify(keys));
-
-alert("Key gerada!");
-loadDashboard();
+alert(`${qty} key(s) gerada(s) para ${selectedUser}!`);
+generateKeyUI(); // atualizar UI e créditos
 }
 
-/* VER TODAS AS KEYS */
+// Ver todas as keys
 function viewKeys(){
 let html="<div class='card'><h3>📂 Todas as Keys</h3>";
-
-keys.forEach(k=>{
-html+=`<p>${k.code} | Dono: ${k.owner} | ${k.date}</p>`;
-});
-
+keys.forEach(k=>{html+=`<p>${k.code} | Dono: ${k.owner} | Validade: ${k.validity} | ${k.date}</p>`;});
 html+="</div>";
 content.innerHTML=html;
 }
 
-/* LOGOUT */
-function logout(){
-localStorage.clear();
-window.location.href="index.html";
-}
+// Logout
+function logout(){localStorage.clear();window.location.href="index.html";}
 
+// Inicializa
+loadDashboard();
 </script>
 
 </body>
