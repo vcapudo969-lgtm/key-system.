@@ -1,119 +1,319 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Usuário</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
-body{height:100vh;background:#0b0f1a;color:white;display:flex;flex-direction:column;}
-.navbar{background:#111827;padding:15px;display:flex;align-items:center;gap:15px;}
-.menu-btn{cursor:pointer;font-size:22px;}
-.sidebar{position:fixed;left:-250px;top:0;width:230px;height:100%;background:#1f2937;transition:.3s;padding-top:60px;z-index:1000;}
-.sidebar a{display:block;padding:15px;color:white;text-decoration:none;border-bottom:1px solid #374151;cursor:pointer;}
-.sidebar a:hover{background:#00ff8830;}
-.sidebar.active{left:0;}
-.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:none;z-index:900;}
-.overlay.active{display:block;}
-.content{padding:20px;flex:1;overflow-y:auto;}
-.card{background:#111827;padding:20px;border-radius:10px;margin-bottom:20px;}
-button{padding:10px;background:#00ff88;border:none;border-radius:6px;cursor:pointer;margin-top:10px;}
-button:hover{opacity:.8;}
-input, select{padding:8px;border-radius:5px;border:none;margin:5px 0;width:100%;color:black;}
-label{color:white;font-weight:bold;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Gerador - Sistema de Créditos</title>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #0d0d0d;
+            --input-bg: #080808;
+            --border-color: #1a1a1a;
+            --text-main: #ffffff;
+            --text-secondary: #777777;
+            --accent-green: #00c853;
+            --accent-red: #ff4d4d;
+            --accent-blue: #007bff;
+            --accent-yellow: #ffc107;
+            --font-family: 'Inter', -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            width: 100%;
+            height: 60px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            background: var(--bg-color);
+            z-index: 100;
+            box-sizing: border-box;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .menu-btn {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu-btn div { width: 18px; height: 2px; background: #fff; }
+
+        /* --- MENU LATERAL --- */
+        .drawer {
+            position: fixed;
+            top: 0; left: -100%;
+            width: 280px; height: 100vh;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            transition: 0.3s;
+            z-index: 200;
+            padding-top: 20px;
+        }
+
+        .drawer.active { left: 0; }
+
+        .drawer button {
+            width: 100%; padding: 15px 25px;
+            background: none; border: none;
+            color: var(--text-secondary); text-align: left;
+            font-size: 16px; cursor: pointer;
+        }
+
+        .drawer button.active { color: var(--text-main); background: #1a1a1a; }
+
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none; z-index: 150;
+        }
+
+        /* --- CONTEÚDO --- */
+        .main-container {
+            width: 90%;
+            max-width: 500px;
+            margin-top: 80px;
+            padding-bottom: 50px;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        h1 { font-size: 24px; font-weight: 600; margin-bottom: 5px; }
+        .subtitle { color: var(--text-secondary); font-size: 13px; margin-bottom: 30px; }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+
+        .label-container {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 10px; color: #eee; font-size: 14px;
+        }
+
+        select, input {
+            width: 100%; background-color: var(--input-bg);
+            border: 1px solid var(--border-color); color: #fff;
+            padding: 15px; border-radius: 10px; font-size: 14px;
+            box-sizing: border-box; outline: none;
+        }
+
+        .credits-box {
+            border-top: 1px solid #1a1a1a;
+            margin-top: 25px; padding-top: 20px;
+        }
+
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .credits-count { color: var(--accent-green); font-size: 20px !important; }
+
+        .btn-generate {
+            width: 100%; background: none; border: 1px solid var(--border-color);
+            color: #fff; font-size: 16px; margin-top: 20px;
+            cursor: pointer; padding: 15px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .btn-generate:hover { background: #111; }
+
+        /* --- LISTA DE KEYS --- */
+        .key-item {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            padding: 20px; border-radius: 12px; margin-bottom: 15px;
+        }
+
+        .key-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .key-name { font-weight: bold; font-size: 16px; color: var(--accent-green); }
+        .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+        .status-active { background: rgba(0, 200, 83, 0.1); color: var(--accent-green); }
+        .status-paused { background: rgba(255, 193, 7, 0.1); color: var(--accent-yellow); }
+
+        .key-actions { display: flex; gap: 10px; }
+        .btn-action { flex: 1; padding: 10px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid var(--border-color); background: var(--input-bg); color: white; }
+    </style>
 </head>
 <body>
 
-<div class="navbar">
-<div class="menu-btn" onclick="toggleMenu()">☰</div>
-<h3>Painel Usuário</h3>
-</div>
+    <nav class="navbar">
+        <div class="menu-btn" onclick="toggleMenu()">
+            <div></div><div></div><div></div>
+        </div>
+        <div style="margin-left: 15px; font-weight: bold; font-size: 14px;">PAINEL ANDROID SAFE</div>
+    </nav>
 
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-<div class="sidebar" id="sidebar">
-<a onclick="showDashboard()">📊 Dashboard</a>
-<a onclick="generateKeyUI()">⚡ Gerar Key</a>
-<a onclick="viewMyKeys()">🔑 Minhas Keys</a>
-<a onclick="logout()">🚪 Sair</a>
-</div>
+    <div class="drawer" id="drawer">
+        <button class="active" onclick="switchTab('inicio')">Gerar Keys</button>
+        <button onclick="switchTab('minhas-keys')">Minhas Keys</button>
+    </div>
 
-<div class="content" id="content"></div>
+    <div class="main-container">
+        
+        <div id="inicio" class="tab-content active">
+            <h1>Gerar Keys</h1>
+            <p class="subtitle">Saldo inicial: 25 créditos</p>
 
-<script>
-if(localStorage.getItem("role")!=="user"){window.location.href="index.html";}
-let currentUser = localStorage.getItem("currentUser");
-let users = JSON.parse(localStorage.getItem("users")) || {};
-let keys = JSON.parse(localStorage.getItem("keys")) || [];
+            <div class="card">
+                <div class="form-group">
+                    <div class="label-container">🕒 Versão de Login</div>
+                    <select><option>ANDROID SAFE</option></select>
+                </div>
 
-function toggleMenu(){sidebar.classList.toggle("active");overlay.classList.toggle("active");}
+                <div class="form-group">
+                    <div class="label-container">🕒 Validade</div>
+                    <select id="validitySelect" onchange="updateCalculations()">
+                        <option value="1">1 dia (1 cred)</option>
+                        <option value="3">3 dias (5 creds)</option>
+                        <option value="7">7 dias (10 creds)</option>
+                        <option value="30">30 dias (25 creds)</option>
+                    </select>
+                </div>
 
-// 📊 Dashboard
-function showDashboard(){
-content.innerHTML=`<div class="card"><h3>📊 Dashboard</h3>
-<p>Email: ${currentUser}</p>
-<p>Créditos disponíveis: ${users[currentUser].credits}</p>
-<p>Total Keys: ${keys.filter(k=>k.owner===currentUser).length}</p>
-</div>`;
-}
-showDashboard();
+                <div class="form-group">
+                    <div class="label-container"># Quantidade</div>
+                    <input type="number" id="inputQuantity" value="1" min="1" oninput="updateCalculations()">
+                </div>
 
-// ⚡ Gerar Key UI
-function generateKeyUI(){
-let creditCost = 1; // custo por key
-content.innerHTML = `
-<div class="card">
-<h3>⚡ Gerar Key</h3>
-<p>Créditos disponíveis: ${users[currentUser].credits}</p>
-<label>Validade:</label>
-<select id="keyValidity">
-<option value="24h">24h</option>
-<option value="7d">7d</option>
-<option value="30d">30d</option>
-</select>
-<label>Quantidade de keys:</label>
-<input type="number" id="keyQty" value="1" min="1">
-<button onclick="generateUserKeys(${creditCost})">Gerar Key(s)</button>
-</div>
-`;
-}
+                <div class="credits-box">
+                    <div class="row">
+                        <span>📋 Total a Pagar:</span>
+                        <b id="totalNeeded">1</b>
+                    </div>
+                    <div class="row">
+                        <span>✅ Seus Créditos:</span>
+                        <b class="credits-count" id="userCredits">25</b>
+                    </div>
+                </div>
 
-// Gerar keys e gastar créditos
-function generateUserKeys(cost){
-let qty = parseInt(document.getElementById("keyQty").value);
-let validity = document.getElementById("keyValidity").value;
-let totalCost = qty * cost;
+                <button class="btn-generate" onclick="simularGerar()">
+                    <span style="font-size: 20px;">+</span> Gerar Keys
+                </button>
+            </div>
+        </div>
 
-if(users[currentUser].credits < totalCost){
-    alert("Créditos insuficientes!");
-    return;
-}
+        <div id="minhas-keys" class="tab-content">
+            <h1>Minhas Keys</h1>
+            <p class="subtitle">Histórico de geração</p>
+            <div id="keys-list">
+                <p style="text-align: center; color: #444; margin-top: 40px;">Nenhuma key encontrada.</p>
+            </div>
+        </div>
 
-for(let i=0;i<qty;i++){
-    let key = "KEY-"+Math.random().toString(36).substr(2,9).toUpperCase();
-    keys.push({code:key,owner:currentUser,date:new Date().toLocaleDateString(),validity:validity});
-}
+    </div>
 
-users[currentUser].credits -= totalCost;
-localStorage.setItem("users",JSON.stringify(users));
-localStorage.setItem("keys",JSON.stringify(keys));
-alert(`${qty} key(s) gerada(s)!`);
-generateKeyUI(); // atualizar painel com créditos atualizados
-}
+    <script>
+        // Sistema de Créditos Real (em memória da sessão)
+        let currentBalance = 25;
+        const prices = { "1": 1, "3": 5, "7": 10, "30": 25 };
 
-// 🔑 Ver minhas keys
-function viewMyKeys(){
-let userKeys = keys.filter(k=>k.owner===currentUser);
-let html="<div class='card'><h3>🔑 Minhas Keys</h3>";
-if(userKeys.length===0){html+="<p>Nenhuma key gerada ainda.</p>";}else{userKeys.forEach(k=>{html+=`<p>${k.code} | Validade: ${k.validity} | ${k.date}</p>`;});}
-html+="</div>";
-content.innerHTML=html;
-}
+        function updateCalculations() {
+            const days = document.getElementById('validitySelect').value;
+            const qty = parseInt(document.getElementById('inputQuantity').value) || 0;
+            const total = prices[days] * qty;
+            document.getElementById('totalNeeded').innerText = total;
+            
+            // Visual de erro se não tiver saldo
+            const totalText = document.getElementById('totalNeeded');
+            if (total > currentBalance) {
+                totalText.style.color = "var(--accent-red)";
+            } else {
+                totalText.style.color = "white";
+            }
+        }
 
-// 🚪 Logout
-function logout(){localStorage.clear();window.location.href="index.html";}
-</script>
+        function toggleMenu() {
+            const drawer = document.getElementById('drawer');
+            const overlay = document.getElementById('overlay');
+            drawer.classList.toggle('active');
+            overlay.style.display = drawer.classList.contains('active') ? 'block' : 'none';
+        }
 
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.drawer button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (event) event.currentTarget.classList.add('active');
+            toggleMenu();
+        }
+
+        function simularGerar() {
+            const days = document.getElementById('validitySelect').value;
+            const qty = parseInt(document.getElementById('inputQuantity').value) || 0;
+            const totalCost = prices[days] * qty;
+
+            if (totalCost > currentBalance) {
+                alert("ERRO: Saldo insuficiente! Você precisa de " + totalCost + " créditos.");
+                return;
+            }
+
+            // Deduzir créditos
+            currentBalance -= totalCost;
+            document.getElementById('userCredits').innerText = currentBalance;
+
+            // Adicionar keys à lista
+            const list = document.getElementById('keys-list');
+            if(list.innerText.includes('Nenhuma')) list.innerHTML = '';
+
+            for(let i = 0; i < qty; i++) {
+                const keyStr = "SAFE-" + Math.random().toString(36).substr(2, 7).toUpperCase();
+                const item = document.createElement('div');
+                item.className = 'key-item';
+                item.innerHTML = `
+                    <div class="key-header">
+                        <div>
+                            <div class="key-name">${keyStr}</div>
+                            <div style="font-size:10px; color:gray">ANDROID SAFE • ${days} Dias</div>
+                        </div>
+                        <span class="status-badge status-active" id="status-${keyStr}">Ativo</span>
+                    </div>
+                    <div class="key-actions">
+                        <button class="btn-action" onclick="alert('HWID Resetado')">Reset HWID</button>
+                        <button class="btn-action" onclick="togglePause('${keyStr}', this)">Pausar</button>
+                    </div>
+                `;
+                list.prepend(item);
+            }
+
+            alert("Sucesso! " + qty + " key(s) gerada(s). Saldo atual: " + currentBalance);
+            updateCalculations();
+        }
+
+        function togglePause(id, btn) {
+            const badge = document.getElementById('status-' + id);
+            if(badge.innerText === 'ATIVO') {
+                badge.innerText = 'PAUSADO';
+                badge.className = 'status-badge status-paused';
+                btn.innerText = 'Retomar';
+            } else {
+                badge.innerText = 'ATIVO';
+                badge.className = 'status-badge status-active';
+                btn.innerText = 'Pausar';
+            }
+        }
+    </script>
 </body>
 </html>
