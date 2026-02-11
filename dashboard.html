@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Chaves de Licença</title>
+    <title>Gerador de Chaves Profissional</title>
     <style>
         :root {
             --primary-purple: #7c4dff;
@@ -15,182 +15,270 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg-color);
+            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
-            margin: 0;
         }
 
-        .container {
-            background: var(--card-bg);
+        /* --- Navbar e Menu --- */
+        .navbar {
+            width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .menu-icon {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--primary-purple);
+        }
+
+        .nav-title {
+            margin-left: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            position: fixed;
+            left: -265px;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: 0.3s;
+            z-index: 1000;
+            padding-top: 60px;
+        }
+
+        .sidebar.active { left: 0; }
+
+        .sidebar a {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            color: #333;
+            display: block;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover { background-color: #f4f0ff; color: var(--primary-purple); }
+
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: none; z-index: 999;
+        }
+        .overlay.active { display: block; }
+
+        /* --- Conteúdo das Abas --- */
+        .tab-content {
+            display: none;
             width: 90%;
             max-width: 400px;
-            padding: 20px;
+            margin-top: 30px;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Estilo do Card original --- */
+        .container {
+            background: var(--card-bg);
+            padding: 25px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             text-align: center;
         }
 
-        .header-text {
-            color: var(--text-gray);
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-        }
-
-        .field-group {
-            text-align: left;
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: #444;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Estilização dos Selects e Inputs */
+        .header-text { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 20px; }
+        .field-group { text-align: left; margin-bottom: 20px; }
+        label { display: block; font-size: 0.75rem; font-weight: bold; color: #444; margin-bottom: 8px; text-transform: uppercase; }
+        
         select, .quantity-display {
-            width: 100%;
-            padding: 12px;
-            border: 1.5px solid var(--border-color);
-            border-radius: 10px;
-            background-color: #fdfdfd;
-            font-size: 1rem;
-            color: #333;
-            outline: none;
-            box-sizing: border-box;
+            width: 100%; padding: 12px; border: 1.5px solid var(--border-color);
+            border-radius: 10px; font-size: 1rem; outline: none; box-sizing: border-box;
+            background: #fff;
         }
 
-        select:focus {
-            border-color: var(--primary-purple);
-        }
-
-        /* Área de Quantidade */
-        .quantity-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+        .quantity-wrapper { display: flex; align-items: center; gap: 10px; }
         .btn-step {
-            background-color: var(--primary-purple);
-            color: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 8px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
+            background-color: var(--primary-purple); color: white; border: none;
+            width: 45px; height: 45px; border-radius: 8px; font-size: 1.5rem; cursor: pointer;
         }
 
-        .btn-step:hover {
-            background-color: var(--dark-purple);
-        }
-
-        .quantity-display {
-            text-align: center;
-            background-color: #eeeef5;
-            font-weight: bold;
-        }
-
-        /* Botão Principal */
         .btn-generate {
-            width: 100%;
-            background-color: var(--primary-purple);
-            color: white;
-            border: none;
+            width: 100%; background-color: var(--primary-purple); color: white; border: none;
+            padding: 15px; border-radius: 12px; font-size: 1rem; font-weight: bold;
+            text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+
+        /* --- Estilo da Aba Minhas Keys --- */
+        .key-item {
+            background: white;
             padding: 15px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
+            border-radius: 10px;
+            margin-bottom: 10px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-            transition: transform 0.1s;
+            border-left: 5px solid var(--primary-purple);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        .btn-generate:active {
-            transform: scale(0.98);
-        }
+        .key-info { font-family: monospace; font-weight: bold; color: #333; font-size: 1rem; }
+        .key-status { font-size: 0.7rem; background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 5px; font-weight: bold; }
 
-        /* Rodapé */
-        .footer {
-            margin-top: 20px;
-            font-size: 0.75rem;
-            color: #888;
-        }
-
-        .footer span {
-            color: var(--primary-purple);
-        }
-
+        .footer { margin-top: auto; padding: 20px; font-size: 0.75rem; color: #888; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <p class="header-text">Generate license keys for your customers</p>
+    <div class="navbar">
+        <div class="menu-icon" onclick="toggleMenu()">☰</div>
+        <div class="nav-title" id="page-title">Gerador</div>
+    </div>
 
-        <div class="field-group">
-            <label>📦 Product Type:</label>
-            <select>
-                <option>Pedro Gostoso</option>
-                <option>David Gostoso</option>
-            </select>
-        </div>
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    
+    <div class="sidebar" id="sidebar">
+        <a onclick="showTab('tab-home', 'Gerador')">🏠 Home</a>
+        <a onclick="showTab('tab-keys', 'Minhas Keys')">🔑 Minhas Keys</a>
+        <a onclick="clearKeys()" style="color: #ff5252;">🗑️ Limpar Tudo</a>
+    </div>
 
-        <div class="field-group">
-            <label>⌛ Validity:</label>
-            <select>
-                <option>1 Days - $1.00</option>
-                <option>7 Days - $5.00</option>
-                <option>30 Days - $15.00</option>
-            </select>
-        </div>
-
-        <div class="field-group">
-            <label>🧩 Quantity:</label>
-            <div class="quantity-wrapper">
-                <button class="btn-step" onclick="changeQty(-1)">-</button>
-                <div class="quantity-display" id="qty">5</div>
-                <button class="btn-step" onclick="changeQty(1)">+</button>
+    <div id="tab-home" class="tab-content active">
+        <div class="container">
+            <p class="header-text">Generate license keys for your customers</p>
+            <div class="field-group">
+                <label>📦 Product Type:</label>
+                <select id="product-type"><option>Pedro Gostoso</option><option>Pedro Molestador</option></select>
             </div>
+            <div class="field-group">
+                <label>⌛ Validity:</label>
+                <select id="validity"><option>1 Days - $1.00</option><option>7 Days - $5.00</option></select>
+            </div>
+            <div class="field-group">
+                <label>🧩 Quantity:</label>
+                <div class="quantity-wrapper">
+                    <button class="btn-step" onclick="changeQty(-1)">-</button>
+                    <div class="quantity-display" id="qty">1</div>
+                    <button class="btn-step" onclick="changeQty(1)">+</button>
+                </div>
+            </div>
+            <button class="btn-generate" onclick="generateKeys()">⚡ Generate Keys</button>
         </div>
+    </div>
 
-        <button class="btn-generate">
-            ⚡ Generate Keys
-        </button>
+    <div id="tab-keys" class="tab-content">
+        <div id="keys-list">
+            </div>
     </div>
 
     <div class="footer">
-        &lt;/&gt; © 2025 License Premium - Secured Platform 💜
+        &lt;/&gt; © 2025 License Premium 💜
     </div>
 
     <script>
+        // Carregar chaves já existentes do armazenamento do navegador
+        let keysDatabase = JSON.parse(localStorage.getItem('myGeneratedKeys')) || [];
+
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        function showTab(tabId, title) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById('page-title').innerText = title;
+            if(tabId === 'tab-keys') updateKeysUI();
+            toggleMenu();
+        }
+
         function changeQty(val) {
             const display = document.getElementById('qty');
             let current = parseInt(display.innerText);
-            if (current + val >= 1) {
-                display.innerText = current + val;
+            if (current + val >= 1) display.innerText = current + val;
+        }
+
+        function generateKeys() {
+            const quantity = parseInt(document.getElementById('qty').innerText);
+            const product = document.getElementById('product-type').value;
+            const validity = document.getElementById('validity').value.split(' - ')[0];
+
+            for (let i = 0; i < quantity; i++) {
+                const randomKey = "PEDRO-" + Math.random().toString(36).substr(2, 9).toUpperCase();
+                keysDatabase.push({
+                    key: randomKey,
+                    product: product,
+                    validity: validity,
+                    date: new Date().toLocaleDateString()
+                });
+            }
+
+            // Guardar no armazenamento local
+            localStorage.setItem('myGeneratedKeys', JSON.stringify(keysDatabase));
+            
+            alert(`${quantity} chave(s) gerada(s)! Verifique na aba 'Minhas Keys'.`);
+            updateKeysUI();
+        }
+
+        function updateKeysUI() {
+            const container = document.getElementById('keys-list');
+            container.innerHTML = '';
+
+            if (keysDatabase.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; margin-top: 20px;">Nenhuma chave gerada ainda.</p>';
+                return;
+            }
+
+            // Mostrar das mais recentes para as mais antigas
+            [...keysDatabase].reverse().forEach(item => {
+                const keyHTML = `
+                    <div class="key-item">
+                        <div>
+                            <div class="key-info">${item.key}</div>
+                            <small>${item.product} (${item.validity})</small>
+                        </div>
+                        <span class="key-status">ATIVA</span>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', keyHTML);
+            });
+        }
+
+        function clearKeys() {
+            if(confirm("Tem certeza que deseja apagar todas as chaves?")) {
+                keysDatabase = [];
+                localStorage.removeItem('myGeneratedKeys');
+                updateKeysUI();
+                toggleMenu();
             }
         }
-    </script>
 
+        // Inicializar a lista ao abrir
+        updateKeysUI();
+    </script>
 </body>
 </html>
+
