@@ -1,63 +1,34 @@
 import { auth, db } from "./firebase.js";
 import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
 import {
   doc,
-  setDoc,
-  getDoc
+  setDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-window.login = async () => {
-  try {
-    const emailInput = document.getElementById("email").value;
-    const passwordInput = document.getElementById("password").value;
+const ADMIN_EMAIL = "seuemail@gmail.com";
 
-    const res = await signInWithEmailAndPassword(
-      auth,
-      emailInput,
-      passwordInput
-    );
+window.register = async function () {
+  const email = email.value;
+  const password = password.value;
 
-    const snap = await getDoc(doc(db, "users", res.user.uid));
+  const cred = await createUserWithEmailAndPassword(auth, email, password);
 
-    if (!snap.exists()) {
-      alert("Usuário não encontrado no banco");
-      return;
-    }
+  await setDoc(doc(db, "users", cred.user.uid), {
+    email,
+    role: email === ADMIN_EMAIL ? "admin" : "user",
+    credits: 100,
+    refCode: Math.random().toString(36).substring(2,8),
+    createdAt: new Date()
+  });
 
-    if (snap.data().role === "admin") {
-      window.location.href = "admin.html";
-    } else {
-      window.location.href = "dashboard.html";
-    }
-
-  } catch (err) {
-    alert("Erro no login: " + err.message);
-  }
+  window.location.href = "dashboard.html";
 };
 
-window.register = async () => {
-  try {
-    const emailInput = document.getElementById("email").value;
-    const passwordInput = document.getElementById("password").value;
-
-    const res = await createUserWithEmailAndPassword(
-      auth,
-      emailInput,
-      passwordInput
-    );
-
-    await setDoc(doc(db, "users", res.user.uid), {
-      email: emailInput,
-      credits: 0,
-      role: "user"
-    });
-
-    window.location.href = "dashboard.html";
-
-  } catch (err) {
-    alert("Erro no registro: " + err.message);
-  }
+window.login = async function () {
+  await signInWithEmailAndPassword(auth, email.value, password.value);
+  window.location.href = "dashboard.html";
 };
