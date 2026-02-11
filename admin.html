@@ -46,114 +46,129 @@ label{color:white;font-weight:bold;}
 <script>
 // Proteção ADM
 if(localStorage.getItem("role")!=="admin"){window.location.href="index.html";}
-let users = JSON.parse(localStorage.getItem("users")) || {};
-let keys = JSON.parse(localStorage.getItem("keys")) || [];
-let currentUser = localStorage.getItem("currentUser");
+
+// Inicializa usuários e keys caso não existam
+if(!localStorage.getItem("users")){
+  let defaultUsers = {
+    "ADM": {credits:100, role:"admin"},
+    "User1": {credits:10, role:"user"}
+  };
+  localStorage.setItem("users", JSON.stringify(defaultUsers));
+}
+if(!localStorage.getItem("keys")){
+  localStorage.setItem("keys", JSON.stringify([]));
+}
+
+let users = JSON.parse(localStorage.getItem("users"));
+let keys = JSON.parse(localStorage.getItem("keys"));
+let currentUser = localStorage.getItem("currentUser") || "ADM";
 
 // Menu toggle
 function toggleMenu(){sidebar.classList.toggle("active");overlay.classList.toggle("active");}
 
 // 📊 Dashboard
 function loadDashboard(){
-let totalCredits = Object.values(users).reduce((a,b)=>a+b.credits,0);
-content.innerHTML=`<div class="card">
-<h3>📊 Dashboard</h3>
-<p>Total usuários: ${Object.keys(users).length}</p>
-<p>Total keys: ${keys.length}</p>
-<p>Total créditos no sistema: ${totalCredits}</p>
-<p>Seu saldo ADM: ${users[currentUser].credits}</p>
-</div>`;
+  let totalCredits = Object.values(users).reduce((a,b)=>a.credits+a,0);
+  content.innerHTML=`<div class="card">
+  <h3>📊 Dashboard</h3>
+  <p>Total usuários: ${Object.keys(users).length}</p>
+  <p>Total keys: ${keys.length}</p>
+  <p>Total créditos no sistema: ${totalCredits}</p>
+  <p>Seu saldo ADM: ${users[currentUser].credits}</p>
+  </div>`;
 }
 
 // ⚡ Gerar Key (só para ADM)
 function generateKeyUI(){
-let creditCost = 1;
-content.innerHTML = `<div class="card">
-<h3>⚡ Gerar Key (Para você)</h3>
-<p>Créditos disponíveis: ${users[currentUser].credits}</p>
-<label>Validade:</label>
-<select id="keyValidity">
-<option value="24h">24h</option>
-<option value="7d">7d</option>
-<option value="30d">30d</option>
-</select>
-<label>Quantidade de keys:</label>
-<input type="number" id="keyQty" value="1" min="1">
-<p>Créditos por key: ${creditCost}</p>
-<button onclick="generateKeysForADM(${creditCost})">Gerar Key(s)</button>
-</div>`;
+  let creditCost = 1;
+  content.innerHTML = `<div class="card">
+  <h3>⚡ Gerar Key (Para você)</h3>
+  <p>Créditos disponíveis: ${users[currentUser].credits}</p>
+  <label>Validade:</label>
+  <select id="keyValidity">
+    <option value="24h">24h</option>
+    <option value="7d">7d</option>
+    <option value="30d">30d</option>
+  </select>
+  <label>Quantidade de keys:</label>
+  <input type="number" id="keyQty" value="1" min="1">
+  <p>Créditos por key: ${creditCost}</p>
+  <button onclick="generateKeysForADM(${creditCost})">Gerar Key(s)</button>
+  </div>`;
 }
 
 function generateKeysForADM(cost){
-let qty = parseInt(document.getElementById("keyQty").value);
-let validity = document.getElementById("keyValidity").value;
-let totalCost = qty*cost;
+  let qty = parseInt(document.getElementById("keyQty").value);
+  let validity = document.getElementById("keyValidity").value;
+  let totalCost = qty*cost;
 
-if(users[currentUser].credits < totalCost){
+  if(users[currentUser].credits < totalCost){
     alert("Créditos insuficientes!");
     return;
-}
+  }
 
-for(let i=0;i<qty;i++){
+  for(let i=0;i<qty;i++){
     let key = "KEY-"+Math.random().toString(36).substr(2,9).toUpperCase();
     keys.push({code:key,owner:currentUser,date:new Date().toLocaleDateString(),validity:validity,status:"active"});
-}
+  }
 
-users[currentUser].credits -= totalCost;
-localStorage.setItem("users",JSON.stringify(users));
-localStorage.setItem("keys",JSON.stringify(keys));
-alert(`${qty} key(s) gerada(s)!`);
-generateKeyUI();
+  users[currentUser].credits -= totalCost;
+  localStorage.setItem("users",JSON.stringify(users));
+  localStorage.setItem("keys",JSON.stringify(keys));
+  alert(`${qty} key(s) gerada(s)!`);
+  generateKeyUI();
 }
 
 // 👥 Ver Usuários
 function viewUsers(){
-let html="<div class='card'><h3>👥 Todos os Usuários</h3>";
-for(const user in users){
-    html+=`<p>${user} | Créditos: ${users[user].credits}</p>`;
-}
-html+="</div>";
-content.innerHTML=html;
+  let html="<div class='card'><h3>👥 Todos os Usuários</h3>";
+  for(const user in users){
+    const credits = users[user]?.credits || 0;
+    html+=`<p>${user} | Créditos: ${credits}</p>`;
+  }
+  html+="</div>";
+  content.innerHTML=html;
 }
 
 // 💰 Gerenciar Créditos (digitar nome)
 function manageCredits(){
-content.innerHTML = `<div class="card">
-<h3>💰 Gerenciar Créditos</h3>
-<label>Nome do usuário:</label>
-<input type="text" id="creditUser" placeholder="Digite o nome do usuário">
-<label>Adicionar créditos:</label>
-<input type="number" id="addCredits" value="0" min="0">
-<label>Remover créditos:</label>
-<input type="number" id="removeCredits" value="0" min="0">
-<button onclick="updateCredits()">Atualizar Créditos</button>
-</div>`;
+  content.innerHTML = `<div class="card">
+  <h3>💰 Gerenciar Créditos</h3>
+  <label>Nome do usuário:</label>
+  <input type="text" id="creditUser" placeholder="Digite o nome do usuário">
+  <label>Adicionar créditos:</label>
+  <input type="number" id="addCredits" value="0" min="0">
+  <label>Remover créditos:</label>
+  <input type="number" id="removeCredits" value="0" min="0">
+  <button onclick="updateCredits()">Atualizar Créditos</button>
+  </div>`;
 }
 
 function updateCredits(){
-let user = document.getElementById("creditUser").value.trim();
-let add = parseInt(document.getElementById("addCredits").value) || 0;
-let remove = parseInt(document.getElementById("removeCredits").value) || 0;
+  let user = document.getElementById("creditUser").value.trim();
+  let add = parseInt(document.getElementById("addCredits").value) || 0;
+  let remove = parseInt(document.getElementById("removeCredits").value) || 0;
 
-if(!users[user]){
+  if(!users[user]){
     alert("Usuário não encontrado!");
     return;
-}
+  }
 
-users[user].credits = (users[user].credits + add) - remove;
-if(users[user].credits<0) users[user].credits=0;
-localStorage.setItem("users",JSON.stringify(users));
-alert(`Créditos atualizados para ${user}: ${users[user].credits}`);
-manageCredits();
+  users[user].credits = (users[user].credits + add) - remove;
+  if(users[user].credits<0) users[user].credits=0;
+  localStorage.setItem("users",JSON.stringify(users));
+  alert(`Créditos atualizados para ${user}: ${users[user].credits}`);
+  manageCredits();
 }
 
 // 📂 Ver todas as keys
 function viewKeys(){
-let html="<div class='card'><h3>📂 Todas as Keys</h3>";
-if(keys.length===0){html+="<p>Nenhuma key gerada ainda.</p>";}else{
-keys.forEach(k=>{html+=`<p>${k.code} | Dono: ${k.owner} | Validade: ${k.validity} | ${k.status}</p>`;});}
-html+="</div>";
-content.innerHTML=html;
+  let html="<div class='card'><h3>📂 Todas as Keys</h3>";
+  if(keys.length===0){html+="<p>Nenhuma key gerada ainda.</p>";}else{
+    keys.forEach(k=>{html+=`<p>${k.code} | Dono: ${k.owner} | Validade: ${k.validity} | ${k.status}</p>`;});
+  }
+  html+="</div>";
+  content.innerHTML=html;
 }
 
 // Logout
