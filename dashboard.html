@@ -1,34 +1,196 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Chaves de Licença</title>
+    <style>
+        :root {
+            --primary-purple: #7c4dff;
+            --dark-purple: #6200ea;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-gray: #666;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .header-text {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .field-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Estilização dos Selects e Inputs */
+        select, .quantity-display {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            background-color: #fdfdfd;
+            font-size: 1rem;
+            color: #333;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        select:focus {
+            border-color: var(--primary-purple);
+        }
+
+        /* Área de Quantidade */
+        .quantity-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-step {
+            background-color: var(--primary-purple);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .btn-step:hover {
+            background-color: var(--dark-purple);
+        }
+
+        .quantity-display {
+            text-align: center;
+            background-color: #eeeef5;
+            font-weight: bold;
+        }
+
+        /* Botão Principal */
+        .btn-generate {
+            width: 100%;
+            background-color: var(--primary-purple);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            transition: transform 0.1s;
+        }
+
+        .btn-generate:active {
+            transform: scale(0.98);
+        }
+
+        /* Rodapé */
+        .footer {
+            margin-top: 20px;
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .footer span {
+            color: var(--primary-purple);
+        }
+
+    </style>
 </head>
 <body>
 
-<div class="menu">
-  <button onclick="logout()">Sair</button>
-</div>
+    <div class="container">
+        <p class="header-text">Generate license keys for your customers</p>
 
-<div class="card">
-  <h2>Dashboard</h2>
-  <p id="credits">Créditos: 0</p>
+        <div class="field-group">
+            <label>📦 Product Type:</label>
+            <select>
+                <option>Pedro Gostoso</option>
+                <option>David Gostoso</option>
+            </select>
+        </div>
 
-  <select id="time">
-    <option value="1">24h - 1 crédito</option>
-    <option value="3">3 dias - 5 créditos</option>
-    <option value="5">5 dias - 10 créditos</option>
-    <option value="15">15 dias - 20 créditos</option>
-    <option value="30">30 dias - 30 créditos</option>
-  </select>
+        <div class="field-group">
+            <label>⌛ Validity:</label>
+            <select>
+                <option>1 Days - $1.00</option>
+                <option>7 Days - $5.00</option>
+                <option>30 Days - $15.00</option>
+            </select>
+        </div>
 
-  <button onclick="generateKey()">Gerar Key</button>
+        <div class="field-group">
+            <label>🧩 Quantity:</label>
+            <div class="quantity-wrapper">
+                <button class="btn-step" onclick="changeQty(-1)">-</button>
+                <div class="quantity-display" id="qty">5</div>
+                <button class="btn-step" onclick="changeQty(1)">+</button>
+            </div>
+        </div>
 
-  <h3>Minhas Keys</h3>
-  <ul id="keys"></ul>
-</div>
+        <button class="btn-generate">
+            ⚡ Generate Keys
+        </button>
+    </div>
 
-<script type="module" src="js/dashboard.js"></script>
+    <div class="footer">
+        &lt;/&gt; © 2025 License Premium - Secured Platform 💜
+    </div>
+
+    <script>
+        function changeQty(val) {
+            const display = document.getElementById('qty');
+            let current = parseInt(display.innerText);
+            if (current + val >= 1) {
+                display.innerText = current + val;
+            }
+        }
+    </script>
+
 </body>
 </html>
