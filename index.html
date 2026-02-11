@@ -119,13 +119,13 @@ input:focus{
   </div>
 
   <div id="loginBox">
-    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="email" id="loginEmail" placeholder="usuário">
     <input type="password" id="loginPassword" placeholder="Senha">
     <button class="main-btn" onclick="login()">ENTRAR</button>
   </div>
 
   <div id="registerBox" style="display:none;">
-    <input type="email" id="registerEmail" placeholder="Email">
+    <input type="email" id="registerEmail" placeholder="usuário">
     <input type="password" id="registerPassword" placeholder="Senha">
     <button class="main-btn" onclick="register()">CRIAR CONTA</button>
   </div>
@@ -137,8 +137,8 @@ input:focus{
 <script>
 let users = JSON.parse(localStorage.getItem("users")) || {};
 
-const ADMIN_EMAIL="admin@admin.com";
-const ADMIN_PASS="123456";
+const ADMIN_EMAIL="Pdrteam";
+const ADMIN_PASS="Pdr2026";
 
 function showLogin(){
   document.getElementById("loginBox").style.display="block";
