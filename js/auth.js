@@ -12,23 +12,35 @@ import {
 const ADMIN_EMAIL = "seuemail@gmail.com";
 
 window.register = async function () {
-  const email = email.value;
-  const password = password.value;
+  try {
+    const email = registerEmail.value;
+    const password = registerPassword.value;
 
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
 
-  await setDoc(doc(db, "users", cred.user.uid), {
-    email,
-    role: email === ADMIN_EMAIL ? "admin" : "user",
-    credits: 100,
-    refCode: Math.random().toString(36).substring(2,8),
-    createdAt: new Date()
-  });
+    await setDoc(doc(db, "users", cred.user.uid), {
+      email,
+      role: email === ADMIN_EMAIL ? "admin" : "user",
+      credits: 100,
+      createdAt: new Date()
+    });
 
-  window.location.href = "dashboard.html";
+    window.location.href = "dashboard.html";
+  } catch (error) {
+    msg.innerText = error.message;
+  }
 };
 
 window.login = async function () {
-  await signInWithEmailAndPassword(auth, email.value, password.value);
-  window.location.href = "dashboard.html";
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      loginEmail.value,
+      loginPassword.value
+    );
+
+    window.location.href = "dashboard.html";
+  } catch (error) {
+    msg.innerText = error.message;
+  }
 };
