@@ -1,24 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Login - Key System</title>
+<title>Key System - Login</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body class="center">
+<body>
 
-<div class="card">
-  <h1>🔥 KEY SYSTEM</h1>
+<div class="login-container">
+  <div class="login-card">
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Senha">
+    <h1>🔥 KEY SYSTEM</h1>
+    <p class="subtitle">Painel de Acesso</p>
 
-  <button onclick="login()">Entrar</button>
-  <button onclick="register()">Registrar</button>
+    <div class="tabs">
+      <button id="loginTab" class="active" onclick="showLogin()">Entrar</button>
+      <button id="registerTab" onclick="showRegister()">Registrar</button>
+    </div>
 
-  <p id="msg"></p>
+    <div id="loginBox">
+      <input type="email" id="loginEmail" placeholder="Email">
+      <input type="password" id="loginPassword" placeholder="Senha">
+      <button class="main-btn" onclick="login()">Entrar</button>
+    </div>
+
+    <div id="registerBox" style="display:none;">
+      <input type="email" id="registerEmail" placeholder="Email">
+      <input type="password" id="registerPassword" placeholder="Senha">
+      <button class="main-btn" onclick="register()">Criar Conta</button>
+    </div>
+
+    <p id="msg"></p>
+
+  </div>
 </div>
 
 <script type="module" src="js/auth.js"></script>
+
+<script>
+function showLogin(){
+  loginBox.style.display="block"
+  registerBox.style.display="none"
+  loginTab.classList.add("active")
+  registerTab.classList.remove("active")
+}
+
+function showRegister(){
+  loginBox.style.display="none"
+  registerBox.style.display="block"
+  registerTab.classList.add("active")
+  loginTab.classList.remove("active")
+}
+</script>
+
 </body>
 </html>
