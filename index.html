@@ -2,21 +2,29 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Key System - Login</title>
+  <title>Pedro gostoso • Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="center">
+<body>
 
-<div class="card">
-  <h1>KEY SYSTEM</h1>
+  <div class="center">
+    <div class="card">
+      <h1>KEY SYSTEM</h1>
 
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Senha">
+      <input id="email" type="email" placeholder="Email">
+      <input id="password" type="password" placeholder="Senha">
 
-  <button onclick="login()">Entrar</button>
-  <button class="secondary" onclick="register()">Registrar</button>
-</div>
+      <button onclick="login()">Entrar</button>
+      <button class="secondary" onclick="register()">Registrar</button>
+    </div>
+  </div>
 
-<script type="module" src="js/auth.js"></script>
+  <!-- Firebase + Auth -->
+  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/auth.js"></script>
+
 </body>
 </html>
