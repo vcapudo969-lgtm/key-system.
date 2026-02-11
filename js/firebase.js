@@ -3,14 +3,16 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAAOIbO-iUWQgjtIDtuwjUS2ViMoVo4Csc",
-  authDomain: "key-system-54e4f.firebaseapp.com",
-  projectId: "key-system-54e4f",
-  storageBucket: "key-system-54e4f.appspot.com",
-  messagingSenderId: "59328259414",
-  appId: "1:59328259414:web:aaa3188415ebceb12022f7"
+  apiKey: "SUA_API_AQUI",
+  authDomain: "key-system-39e11",
+  projectId: "key-system-39e11",
+  storageBucket: "https://key-system-39e11.firebasestorage.app",
+  messagingSenderId: "1027153056618",
+  appId: "1:1027153056618:web:0fb78d2e497a220328cb13",
+measurementld: "G-WJFSPYLFJ5"
 };
 
-export const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+
 export const auth = getAuth(app);
 export const db = getFirestore(app);
