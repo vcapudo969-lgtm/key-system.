@@ -6,6 +6,7 @@
 <title>Dashboard Key System</title>
 <style>
 body{margin:0;font-family:Arial,sans-serif;background:#0b0f1a;color:white;display:flex;}
+
 /* Sidebar */
 .sidebar{
     position:fixed;
@@ -25,8 +26,10 @@ body{margin:0;font-family:Arial,sans-serif;background:#0b0f1a;color:white;displa
     color:#00ff88;
     text-decoration:none;
     font-weight:bold;
+    cursor:pointer;
 }
 .sidebar a:hover{background:#1f2937;}
+
 /* Overlay */
 .overlay{
     position:fixed;
@@ -35,6 +38,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#0b0f1a;color:white;displa
     display:none; z-index:900;
 }
 .overlay.active{display:block;}
+
 /* Main content */
 .main-content{
     flex:1;
@@ -44,6 +48,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#0b0f1a;color:white;displa
     width:100%;
 }
 .main-content.shift{margin-left:250px;}
+
 /* Navbar */
 .navbar{
     display:flex;
@@ -60,8 +65,9 @@ body{margin:0;font-family:Arial,sans-serif;background:#0b0f1a;color:white;displa
     cursor:pointer;
     color:#00ff88;
 }
-/* Cards e inputs */
-input, select{width:100%;padding:10px;margin:10px 0;border-radius:8px;border:none;}
+
+/* Cards, Inputs, Buttons */
+input, select{width:100%;padding:10px;margin:10px 0;border-radius:8px;border:none;background:#1f2937;color:white;}
 button{padding:10px 15px;background:#00ff88;border:none;border-radius:8px;color:black;font-weight:bold;cursor:pointer;margin-top:10px;}
 .card{background:#111827;padding:15px;margin:10px 0;border-radius:12px;}
 </style>
@@ -69,10 +75,10 @@ button{padding:10px 15px;background:#00ff88;border:none;border-radius:8px;color:
 <body>
 
 <div class="sidebar" id="sidebar">
-    <a onclick="viewUsers()">👥 Ver Usuários</a>
-    <a onclick="generateKeyForm()">⚡ Gerar Key</a>
-    <a onclick="addCreditsForm()">💰 Adicionar Créditos</a>
-    <a onclick="logout()">🚪 Sair</a>
+    <a id="menuUsers">👥 Ver Usuários</a>
+    <a id="menuGenerate">⚡ Gerar Key</a>
+    <a id="menuCredits">💰 Adicionar Créditos</a>
+    <a id="menuLogout">🚪 Sair</a>
 </div>
 
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
@@ -93,17 +99,21 @@ import { doc, setDoc, getDoc, getDocs, updateDoc, collection, Timestamp } from "
 import { signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 let currentUserEmail = null;
+let currentUserRole = null;
 
-auth.onAuthStateChanged(user=>{
-    if(user) currentUserEmail=user.email;
-    else window.location.href="index.html";
-});
-
-// MENU LATERAL
+// Elements
 const sidebar=document.getElementById("sidebar");
 const overlay=document.getElementById("overlay");
 const main=document.getElementById("main");
+const content=document.getElementById("content");
 
+// Menu click
+document.getElementById("menuUsers").onclick=viewUsers;
+document.getElementById("menuGenerate").onclick=generateKeyForm;
+document.getElementById("menuCredits").onclick=addCreditsForm;
+document.getElementById("menuLogout").onclick=logout;
+
+// Toggle menu
 window.toggleMenu=()=>{
     sidebar.classList.toggle("active");
     overlay.classList.toggle("active");
@@ -111,30 +121,50 @@ window.toggleMenu=()=>{
 }
 
 // Logout
-window.logout=async()=>{
+async function logout(){
     await signOut(auth);
     window.location.href="index.html";
 }
 
-// Ver usuários
-window.viewUsers=async()=>{
+// Get current user
+auth.onAuthStateChanged(async(user)=>{
+    if(user){
+        currentUserEmail = user.email;
+        // Get role from Firestore
+        const docSnap = await getDoc(doc(db,"users",currentUserEmail));
+        if(!docSnap.exists()){ alert("Usuário não encontrado!"); return; }
+        currentUserRole = docSnap.data().role;
+        // Hide admin menu if not ADM
+        if(currentUserRole!=="admin"){
+            document.getElementById("menuUsers").style.display="none";
+            document.getElementById("menuCredits").style.display="none";
+        }
+        content.innerHTML="<p>Bem-vindo, "+currentUserEmail+"</p>";
+    }else{
+        window.location.href="index.html";
+    }
+});
+
+// ------------------ FUNÇÕES ------------------
+
+// Ver usuários (só ADM)
+async function viewUsers(){
     toggleMenu();
-    const container=document.getElementById("content");
-    container.innerHTML="<h2>Carregando usuários...</h2>";
-    const querySnapshot=await getDocs(collection(db,"users"));
+    if(currentUserRole!=="admin"){ alert("Acesso negado"); return; }
+    content.innerHTML="<h2>Carregando usuários...</h2>";
+    const querySnap = await getDocs(collection(db,"users"));
     let html="<h2>Todos os Usuários</h2>";
-    querySnapshot.forEach(docSnap=>{
+    querySnap.forEach(docSnap=>{
         const u=docSnap.data();
         html+=`<div class='card'>${u.email} | Créditos: ${u.credits} | Role: ${u.role}</div>`;
     });
-    container.innerHTML=html;
+    content.innerHTML=html;
 }
 
 // Form gerar key
-window.generateKeyForm=()=>{
+function generateKeyForm(){
     toggleMenu();
-    const container=document.getElementById("content");
-    container.innerHTML=`
+    content.innerHTML=`
         <h2>Gerar Key</h2>
         <input type="text" id="keyValidity" placeholder="Validade (ex: 24h, 7d, 30d)">
         <button onclick="generateKey()">Gerar</button>
@@ -142,7 +172,7 @@ window.generateKeyForm=()=>{
 }
 
 // Gerar key
-window.generateKey=async()=>{
+async function generateKey(){
     const validity=document.getElementById("keyValidity").value.trim();
     if(!validity){ alert("Digite validade"); return; }
     const key="KEY-"+Math.random().toString(36).substr(2,9).toUpperCase();
@@ -155,11 +185,11 @@ window.generateKey=async()=>{
     alert("Key gerada: "+key);
 }
 
-// Form adicionar créditos
-window.addCreditsForm=()=>{
+// Form adicionar créditos (só ADM)
+function addCreditsForm(){
     toggleMenu();
-    const container=document.getElementById("content");
-    container.innerHTML=`
+    if(currentUserRole!=="admin"){ alert("Acesso negado"); return; }
+    content.innerHTML=`
         <h2>Adicionar Créditos</h2>
         <input type="text" id="creditEmail" placeholder="Email do usuário">
         <input type="number" id="creditAmount" placeholder="Quantidade de créditos">
@@ -168,18 +198,16 @@ window.addCreditsForm=()=>{
 }
 
 // Adicionar créditos
-window.addCredits=async()=>{
+async function addCredits(){
     const email=document.getElementById("creditEmail").value.trim();
     const amount=parseInt(document.getElementById("creditAmount").value);
     if(!email||!amount){ alert("Preencha todos os campos"); return; }
-
-    const userDoc=doc(db,"users",email);
-    const docSnap=await getDoc(userDoc);
+    const userDoc = doc(db,"users",email);
+    const docSnap = await getDoc(userDoc);
     if(!docSnap.exists()){ alert("Usuário não existe"); return; }
-
-    const currentCredits=docSnap.data().credits||0;
+    const currentCredits = docSnap.data().credits||0;
     await updateDoc(userDoc,{credits:currentCredits+amount});
-    alert("Créditos adicionados com sucesso!");
+    alert("Créditos adicionados!");
     viewUsers();
 }
 </script>
