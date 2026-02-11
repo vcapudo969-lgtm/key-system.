@@ -1,42 +1,198 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-<title>Login</title>
-</head>
-<body style="background:#0b0f1a;color:white;text-align:center;padding-top:100px">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ KEY SYSTEM ⚡</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, Helvetica, sans-serif;}
+body{height:100vh;background:#0b0f1a;display:flex;justify-content:center;align-items:center;overflow:hidden;}
 
-<h2>Login</h2>
-<input type="email" id="email" placeholder="Email"><br><br>
-<input type="password" id="password" placeholder="Senha"><br><br>
-<button onclick="login()">Entrar</button>
+/* Fundo gamer */
+body::before{
+  content:"";
+  position:absolute;
+  width:200%;
+  height:200%;
+  background: radial-gradient(circle,#00ff8830 0%, transparent 60%);
+  animation: glowMove 6s infinite linear;
+}
+
+@keyframes glowMove{
+  0%{transform:translate(-30%,-30%)}
+  50%{transform:translate(-35%,-35%)}
+  100%{transform:translate(-30%,-30%)}
+}
+
+.panel{
+  position:relative;
+  width:480px;
+  padding:50px 40px;
+  background:#111827;
+  border-radius:20px;
+  border:1px solid #00ff8850;
+  box-shadow:0 0 40px #00ff8820;
+  text-align:center;
+  z-index:2;
+}
+
+.panel h1{
+  color:#00ff88;
+  font-size:32px;
+  margin-bottom:10px;
+  text-shadow:0 0 10px #00ff88;
+}
+
+.panel p{
+  color:#94a3b8;
+  margin-bottom:30px;
+}
+
+.tabs{
+  display:flex;
+  margin-bottom:20px;
+}
+
+.tabs button{
+  flex:1;
+  padding:12px;
+  background:#1f2937;
+  border:none;
+  color:#94a3b8;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.tabs button.active{
+  background:#00ff88;
+  color:black;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  margin:12px 0;
+  background:#1f2937;
+  border:1px solid #374151;
+  border-radius:8px;
+  color:white;
+}
+
+input:focus{
+  outline:none;
+  border:1px solid #00ff88;
+}
+
+.main-btn{
+  width:100%;
+  padding:14px;
+  margin-top:20px;
+  background:#00ff88;
+  border:none;
+  border-radius:8px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.main-btn:hover{
+  background:#00cc6a;
+}
+
+#msg{
+  margin-top:15px;
+  min-height:20px;
+  color:#f87171;
+}
+</style>
+</head>
+
+<body>
+
+<div class="panel">
+
+  <h1>⚡ KEY SYSTEM ⚡</h1>
+  <p>Painel de Acesso</p>
+
+  <div class="tabs">
+    <button id="loginTab" class="active" onclick="showLogin()">LOGIN</button>
+    <button id="registerTab" onclick="showRegister()">REGISTRO</button>
+  </div>
+
+  <div id="loginBox">
+    <input type="email" id="loginEmail" placeholder="Email">
+    <input type="password" id="loginPassword" placeholder="Senha">
+    <button class="main-btn" onclick="login()">ENTRAR</button>
+  </div>
+
+  <div id="registerBox" style="display:none;">
+    <input type="email" id="registerEmail" placeholder="Email">
+    <input type="password" id="registerPassword" placeholder="Senha">
+    <button class="main-btn" onclick="register()">CRIAR CONTA</button>
+  </div>
+
+  <div id="msg"></div>
+
+</div>
 
 <script>
+let users = JSON.parse(localStorage.getItem("users")) || {};
 
 const ADMIN_EMAIL="admin@admin.com";
 const ADMIN_PASS="123456";
 
+function showLogin(){
+  document.getElementById("loginBox").style.display="block";
+  document.getElementById("registerBox").style.display="none";
+  document.getElementById("loginTab").classList.add("active");
+  document.getElementById("registerTab").classList.remove("active");
+}
+
+function showRegister(){
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("registerBox").style.display="block";
+  document.getElementById("registerTab").classList.add("active");
+  document.getElementById("loginTab").classList.remove("active");
+}
+
+function register(){
+  let email = document.getElementById("registerEmail").value;
+  let pass = document.getElementById("registerPassword").value;
+
+  if(!email || !pass){
+    document.getElementById("msg").innerText="Preencha todos os campos!";
+    return;
+  }
+
+  if(users[email]){
+    document.getElementById("msg").innerText="Usuário já existe!";
+    return;
+  }
+
+  users[email]={password:pass,credits:5};
+  localStorage.setItem("users",JSON.stringify(users));
+  document.getElementById("msg").innerText="Conta criada com sucesso!";
+}
+
 function login(){
-let email=document.getElementById("email").value;
-let pass=document.getElementById("password").value;
+  let email = document.getElementById("loginEmail").value;
+  let pass = document.getElementById("loginPassword").value;
 
-if(email===ADMIN_EMAIL && pass===ADMIN_PASS){
-localStorage.setItem("role","admin");
-window.location.href="admin.html";
-return;
+  if(email===ADMIN_EMAIL && pass===ADMIN_PASS){
+    localStorage.setItem("role","admin");
+    window.location.href="admin.html";
+    return;
+  }
+
+  if(users[email] && users[email].password===pass){
+    localStorage.setItem("role","user");
+    localStorage.setItem("currentUser",email);
+    window.location.href="dashboard.html";
+    return;
+  }
+
+  document.getElementById("msg").innerText="Login inválido!";
 }
-
-let users=JSON.parse(localStorage.getItem("users"))||{};
-
-if(users[email] && users[email].password===pass){
-localStorage.setItem("role","user");
-localStorage.setItem("currentUser",email);
-window.location.href="dashboard.html";
-return;
-}
-
-alert("Login inválido");
-}
-
 </script>
+
 </body>
 </html>
